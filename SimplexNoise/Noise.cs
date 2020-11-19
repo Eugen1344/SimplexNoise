@@ -16,29 +16,26 @@ namespace SimplexNoise
 	{
 		private readonly Random _random;
 
-		private int _seed;
-		public int Seed
-		{
-			get => _seed;
-			set
-			{
-				_perm = new byte[512];
-				_random.NextBytes(_perm);
-
-				_seed = value;
-			}
-		}
-
 		private byte[] _perm;
 
 		public Noise()
 		{
 			_random = new Random();
+
+			GeneratePerm();
 		}
 
 		public Noise(int seed)
 		{
 			_random = new Random(seed);
+
+			GeneratePerm();
+		}
+
+		private void GeneratePerm()
+		{
+			_perm = new byte[512];
+			_random.NextBytes(_perm);
 		}
 
 		public float[] Calc1D(int width, float scale)
