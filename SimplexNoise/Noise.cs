@@ -14,9 +14,31 @@ namespace SimplexNoise
 	/// </summary>
 	public class Noise
 	{
+		private readonly Random _random;
+
+		private int _seed;
+		public int Seed
+		{
+			get => _seed;
+			set
+			{
+				_perm = new byte[512];
+				_random.NextBytes(_perm);
+
+				_seed = value;
+			}
+		}
+
+		private byte[] _perm;
+
 		public Noise()
 		{
+			_random = new Random();
+		}
 
+		public Noise(int seed)
+		{
+			_random = new Random(seed);
 		}
 
 		public float[] Calc1D(int width, float scale)
@@ -24,6 +46,7 @@ namespace SimplexNoise
 			var values = new float[width];
 			for (var i = 0; i < width; i++)
 				values[i] = Generate(i * scale) * 128 + 128;
+
 			return values;
 		}
 
@@ -33,6 +56,7 @@ namespace SimplexNoise
 			for (var i = 0; i < width; i++)
 				for (var j = 0; j < height; j++)
 					values[i, j] = Generate(i * scale, j * scale) * 128 + 128;
+
 			return values;
 		}
 
@@ -43,6 +67,7 @@ namespace SimplexNoise
 				for (var j = 0; j < height; j++)
 					for (var k = 0; k < length; k++)
 						values[i, j, k] = Generate(i * scale, j * scale, k * scale) * 128 + 128;
+
 			return values;
 		}
 
@@ -60,29 +85,6 @@ namespace SimplexNoise
 		{
 			return Generate(x * scale, y * scale, z * scale) * 128 + 128;
 		}
-
-		public int Seed
-		{
-			get => _seed;
-			set
-			{
-				if (value == 0)
-				{
-					_perm = new byte[PermOriginal.Length];
-					PermOriginal.CopyTo(_perm, 0);
-				}
-				else
-				{
-					_perm = new byte[512];
-					var random = new Random(value);
-					random.NextBytes(_perm);
-				}
-
-				_seed = value;
-			}
-		}
-
-		private int _seed;
 
 		/// <summary>
 		/// 1D simplex noise
@@ -286,8 +288,6 @@ namespace SimplexNoise
 			// The result is scaled to stay just inside [-1,1]
 			return 32.0f * (n0 + n1 + n2 + n3); // TODO: The scale factor is preliminary!
 		}
-
-		private byte[] _perm;
 
 		private static int FastFloor(float x)
 		{
